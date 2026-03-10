@@ -235,28 +235,125 @@
     </div>
   </footer>
 
-  <!-- ========== REGISTRATION MODAL ========== -->
+  <!-- ========== DASHBOARD (Hidden by default) ========== -->
+  <main class="app-dashboard" id="dashboard" style="display: none;">
+    <aside class="sidebar">
+      <div class="sidebar__header">
+        <a href="#" class="logo">Grop<span class="logo__accent">Đ</span></a>
+      </div>
+      <nav class="sidebar__nav">
+        <div class="sidebar__section">
+          <h4 class="sidebar__label">Workspaces</h4>
+          <ul id="workspaceList" class="sidebar__list">
+            <!-- Workspaces will be injected here -->
+          </ul>
+          <button class="btn-sidebar-add" onclick="showCreateWorkspace()">+ New Workspace</button>
+        </div>
+        <div class="sidebar__section">
+          <h4 class="sidebar__label">Projects</h4>
+          <ul id="projectList" class="sidebar__list">
+             <!-- Projects will be injected here -->
+          </ul>
+          <button class="btn-sidebar-add" onclick="showCreateProject()" id="newProjectBtn" disabled>+ New Project</button>
+        </div>
+      </nav>
+      <div class="sidebar__footer">
+        <div class="user-pill">
+           <span id="userDisplayName">User</span>
+           <button onclick="handleLogout()" class="logout-btn" title="Đăng xuất">Logout</button>
+        </div>
+      </div>
+    </aside>
+
+    <section class="main-content">
+      <header class="app-header">
+        <h2 id="currentViewTitle">Dashboard</h2>
+        <div class="app-header__actions">
+           <button class="btn btn--accent btn--sm" id="addTaskBtn" style="display:none;" onclick="showCreateTask()">+ Thêm Task</button>
+        </div>
+      </header>
+      
+      <div id="appViewContainer" class="app-view">
+         <div class="welcome-screen" id="welcomeScreen">
+            <h3>Chào mừng bạn quay lại!</h3>
+            <p>Chọn một workspace hoặc dự án để bắt đầu làm việc.</p>
+         </div>
+         
+         <!-- Task Board View -->
+         <div class="task-board" id="taskBoard" style="display:none;">
+            <div class="board-column" data-status="todo">
+              <h4 class="column-title">Cần làm <span class="count">0</span></h4>
+              <div class="column-tasks" id="todoTasks"></div>
+            </div>
+            <div class="board-column" data-status="in-progress">
+              <h4 class="column-title">Đang làm <span class="count">0</span></h4>
+              <div class="column-tasks" id="inProgressTasks"></div>
+            </div>
+            <div class="board-column" data-status="done">
+              <h4 class="column-title">Hoàn thành <span class="count">0</span></h4>
+              <div class="column-tasks" id="doneTasks"></div>
+            </div>
+         </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== REGISTRATION/LOGIN MODAL ========== -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <button class="modal__close" onclick="closeModal()" aria-label="Close">✕</button>
-      <h2 class="modal__title">Tạo tài khoản Grop<span class="logo__accent">Đ</span></h2>
-      <p class="modal__subtitle">Chỉ mất 10 giây. Không cần thẻ tín dụng.</p>
-      <form id="registerForm" class="modal__form">
-        <div class="form-group">
-          <label for="regEmail">Email</label>
-          <input type="email" id="regEmail" name="email" placeholder="name@email.com" required>
-        </div>
-        <div class="form-group">
-          <label for="regPassword">Mật khẩu</label>
-          <input type="password" id="regPassword" name="password" placeholder="Tối thiểu 6 ký tự" minlength="6" required>
-        </div>
-        <div class="form-group">
-          <label for="regName">Tên hiển thị <span style="color:#999;font-weight:400">(tùy chọn)</span></label>
-          <input type="text" id="regName" name="display_name" placeholder="Nguyễn Văn A">
-        </div>
-        <button type="submit" class="btn btn--accent btn--lg modal__submit" id="registerBtn">Đăng ký miễn phí</button>
-      </form>
-      <p class="modal__footer">Đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập</a></p>
+      
+      <!-- Register Form -->
+      <div id="registerView">
+        <h2 class="modal__title">Tạo tài khoản Grop<span class="logo__accent">Đ</span></h2>
+        <p class="modal__subtitle">Chỉ mất 10 giây. Không cần thẻ tín dụng.</p>
+        <form id="registerForm" class="modal__form">
+          <div class="form-group">
+            <label for="regEmail">Email</label>
+            <input type="email" id="regEmail" name="email" placeholder="name@email.com" required>
+          </div>
+          <div class="form-group">
+            <label for="regPassword">Mật khẩu</label>
+            <input type="password" id="regPassword" name="password" placeholder="Tối thiểu 6 ký tự" minlength="6" required>
+          </div>
+          <div class="form-group">
+            <label for="regName">Tên hiển thị <span style="color:#999;font-weight:400">(tùy chọn)</span></label>
+            <input type="text" id="regName" name="display_name" placeholder="Nguyễn Văn A">
+          </div>
+          <button type="submit" class="btn btn--accent btn--lg modal__submit" id="registerBtn">Đăng ký miễn phí</button>
+        </form>
+        <p class="modal__footer">Đã có tài khoản? <a href="#" onclick="toggleAuthMode('login')">Đăng nhập</a></p>
+      </div>
+
+      <!-- Login Form -->
+      <div id="loginView" style="display: none;">
+        <h2 class="modal__title">Chào mừng trở lại</h2>
+        <p class="modal__subtitle">Đăng nhập vào tài khoản Grop<span class="logo__accent">Đ</span> của bạn.</p>
+        <form id="loginForm" class="modal__form">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" name="email" placeholder="name@email.com" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Mật khẩu</label>
+            <input type="password" id="loginPassword" name="password" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn--accent btn--lg modal__submit" id="loginBtn">Đăng nhập</button>
+        </form>
+        <p class="modal__footer">Chưa có tài khoản? <a href="#" onclick="toggleAuthMode('register')">Đăng ký ngay</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- General Creation Modal (Workspaces/Projects/Tasks) -->
+  <div class="modal-overlay" id="genericModal">
+    <div class="modal">
+       <button class="modal__close" onclick="closeGenericModal()">✕</button>
+       <h2 class="modal__title" id="genericModalTitle">Tạo mới</h2>
+       <form id="genericForm" class="modal__form">
+          <div id="genericFormContent"></div>
+          <button type="submit" class="btn btn--accent btn--lg modal__submit" id="genericSubmitBtn">Lưu</button>
+       </form>
     </div>
   </div>
 
