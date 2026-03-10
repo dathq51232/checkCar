@@ -38,9 +38,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Lỗi hệ thống. Vui lòng thử lại.' });
 });
 
-// ---------- Start Server ----------
-app.listen(PORT, () => {
-  console.log(`\n🚀 GropĐ server running at http://localhost:${PORT}`);
-  console.log(`📡 API: http://localhost:${PORT}/api`);
-  console.log(`🌐 Frontend: http://localhost:${PORT}\n`);
-});
+// ---------- Start Server or Export for Serverless ----------
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 GropĐ server running at http://localhost:${PORT}`);
+    console.log(`📡 API: http://localhost:${PORT}/api`);
+    console.log(`🌐 Frontend: http://localhost:${PORT}\n`);
+  });
+}
+
+// Export the app for Vercel
+module.exports = app;

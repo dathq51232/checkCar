@@ -1,9 +1,9 @@
 // ========================================
-// GropĐ — JWT Auth Middleware
+// GropĐ — Supabase Auth Middleware
 // ========================================
-const jwt = require('jsonwebtoken');
+const supabase = require('../db');
 
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -13,11 +13,16 @@ function authenticate(req, res, next) {
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return res.status(401).json({ error: 'Token không hợp lệ hoặc đã hết hạn.' });
+    }
+
+    req.user = user;
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Token không hợp lệ hoặc đã hết hạn.' });
+    return res.status(401).json({ error: 'Lỗi xác thực token.' });
   }
 }
 
