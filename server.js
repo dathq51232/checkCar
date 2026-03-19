@@ -23,9 +23,12 @@ app.use('/api/projects', require('./routes/projects'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/chats', require('./routes/chats'));
 
-// ---------- Health Check ----------
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// ---------- Config Endpoint ----------
+app.get('/api/config', (req, res) => {
+  res.json({
+    supabaseUrl: process.env.SUPABASE_URL || 'https://bywdgwqwtnopqhjdwknp.supabase.co',
+    supabaseKey: process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5d2Rnd3F3dG5vcHFoamR3a25wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNzYzMTQsImV4cCI6MjA4ODY1MjMxNH0.mhVjS6AQspd3JPfa5qXZuAB91TQlkVfjZ7vCbTPLOKw'
+  });
 });
 
 // ---------- SPA Fallback ----------

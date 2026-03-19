@@ -430,7 +430,17 @@ function escHtml(str) {
 }
 
 // ─── DOMContentLoaded ─────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+
+  // ─ Fetch Config ─
+  try {
+    const config = await fetch('/api/config').then(r => r.json());
+    if (config.supabaseUrl && config.supabaseKey) {
+      window.supabase = supabasejs.createClient(config.supabaseUrl, config.supabaseKey);
+    }
+  } catch (e) {
+    console.warn('Could not fetch dynamic config, using defaults.');
+  }
 
   // Close modals on backdrop click / ESC
   document.querySelectorAll('.modal-overlay').forEach(o => {
@@ -441,20 +451,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─ Register ─
   document.getElementById('registerForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const btn = document.getElementById('registerBtn');
-    btn.disabled = true; btn.textContent = 'Đang xử lý...';
+    const btn      = document.getElementById('registerBtn');
     const email    = document.getElementById('regEmail').value.trim();
     const password = document.getElementById('regPassword').value;
     const name     = document.getElementById('regName').value.trim();
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email, password, options: { data: { display_name: name, full_name: name } }
-      });
-      if (error) throw error;
 
-      // Show email confirmation notice (Supabase default behaviour)
+    btn.disabled = true; btn.textContent = 'Đang xử lý...';
+    try {
+      const resp = await http('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, display_name: name })
+      });
+
+      // Show email confirmation notice
       document.getElementById('emailConfirmNotice').style.display = 'block';
-      toast('🎉 Đăng ký thành công! Hãy kiểm tra email để xác nhận.');
+      toast('🎉 ' + resp.message);
       e.target.reset();
       setTimeout(() => toggleAuthMode('login'), 1500);
     } catch(err) {
@@ -467,28 +478,30 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─ Login ─
   document.getElementById('loginForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const btn = document.getElementById('loginBtn');
-    btn.disabled = true; btn.textContent = 'Đang đăng nhập...';
+    const btn      = document.getElementById('loginBtn');
     const email    = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
 
-      const token = data.session.access_token;
+    btn.disabled = true; btn.textContent = 'Đang đăng nhập...';
+    try {
+      const resp = await http('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+
+      const token = resp.token;
       const userData = {
-        id: data.user.id,
-        email: data.user.email,
-        display_name: data.user.user_metadata?.display_name || data.user.user_metadata?.full_name || ''
+        id: resp.user.id,
+        email: resp.user.email,
+        display_name: resp.user.display_name || ''
       };
       localStorage.setItem('gropd_token', token);
       localStorage.setItem('gropd_user', JSON.stringify(userData));
 
       closeModal();
-      toast('👋 Chào mừng quay trở lại!');
+      toast('👋 ' + resp.message);
       applyLoggedInUser(userData, token);
     } catch(err) {
-      // friendly email-not-confirmed message
       const msg = err.message.includes('Email not confirmed')
         ? '📧 Bạn chưa xác nhận email. Hãy kiểm tra hộp thư của bạn.'
         : err.message;
